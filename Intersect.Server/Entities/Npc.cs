@@ -29,8 +29,29 @@ namespace Intersect.Server.Entities
         //Spell casting
         public long CastFreq;
 
-        //Damage Map - Keep track of who is doing the most damage to this npc and focus accordingly
+        /// <summary>
+        /// Damage Map - Keep track of who is doing the most damage to this npc and focus accordingly
+        /// </summary>
         public ConcurrentDictionary<Entity, long> DamageMap = new ConcurrentDictionary<Entity, long>();
+
+        /// <summary>
+        /// Returns the entity that ranks the highest on this NPC's damage map.
+        /// </summary>
+        public Entity DamageMapHighest { 
+            get {
+                long damage = 0;
+                Entity top = null;
+                foreach (var pair in DamageMap)
+                {
+                    if (pair.Value > damage)
+                    {
+                        top = pair.Key;
+                        damage = pair.Value;
+                    }
+                }
+                return top;
+            } 
+        }
 
         public bool Despawnable;
 
@@ -716,6 +737,7 @@ namespace Intersect.Server.Entities
                     if (mPathFinder.GetTarget() != null)
                     {
                         TryCastSpells();
+                        // Check if can attack
                         if (!IsOneBlockAway(
                             mPathFinder.GetTarget().TargetMapId, mPathFinder.GetTarget().TargetX,
                             mPathFinder.GetTarget().TargetY, mPathFinder.GetTarget().TargetZ
@@ -747,6 +769,22 @@ namespace Intersect.Server.Entities
                                                     dir = 2;
 
                                                     break;
+                                                case 4:
+                                                    dir = 5;
+
+                                                    break;
+                                                case 5:
+                                                    dir = 4;
+
+                                                    break;
+                                                case 6:
+                                                    dir = 7;
+
+                                                    break;
+                                                case 7:
+                                                    dir = 6;
+
+                                                    break;
                                             }
                                         }
 
@@ -770,7 +808,9 @@ namespace Intersect.Server.Entities
                                         {
                                             mPathFinder.PathFailed(timeMs);
                                         }
+                                        
                                     }
+                                    // Npc move when here
 
                                     break;
                                 case PathfinderResult.OutOfRange:
@@ -820,6 +860,22 @@ namespace Intersect.Server.Entities
                                         dir = 2;
 
                                         break;
+                                    case 4:
+                                        dir = 5;
+
+                                        break;
+                                    case 5:
+                                        dir = 4;
+
+                                        break;
+                                    case 6:
+                                        dir = 7;
+
+                                        break;
+                                    case 7:
+                                        dir = 6;
+
+                                        break;
                                 }
 
                                 if (CanMove(dir) == -1 || CanMove(dir) == -4)
@@ -855,6 +911,7 @@ namespace Intersect.Server.Entities
                                     }
                                     else
                                     {
+                                        // Code come here when player is near.
                                         if (CanAttack(Target, null))
                                         {
                                             TryAttack(Target);
@@ -894,7 +951,7 @@ namespace Intersect.Server.Entities
                 var i = Randomization.Next(0, 1);
                 if (i == 0)
                 {
-                    i = Randomization.Next(0, 4);
+                    i = Randomization.Next(0, 8);
                     if (CanMove(i) == -1)
                     {
                         //check if NPC is snared or stunned
@@ -910,6 +967,7 @@ namespace Intersect.Server.Entities
                         }
 
                         Move((byte) i, null);
+                        
                     }
                 }
 
@@ -934,6 +992,7 @@ namespace Intersect.Server.Entities
                     MapInstance.Get(MapId).AddEntity(this);
                 }
             }
+            // End of the Npc Movement
         }
 
         public override void NotifySwarm(Entity attacker)
